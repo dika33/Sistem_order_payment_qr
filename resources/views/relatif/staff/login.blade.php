@@ -155,9 +155,9 @@
             </div>
 
             <div class="flex flex-col gap-3 relative z-10">
-                <a href="{{ route('relatif.menu') }}" 
+                <a href="{{ route('relatif.cashier') }}" 
                    class="w-full h-[46px] bg-[#EE671C] hover:bg-[#d65510] text-[#4C1A00] font-montserrat font-bold text-xs uppercase tracking-widest rounded-sm flex items-center justify-center gap-2 transition duration-200">
-                    Go to Menu Dashboard
+                    Go to Cashier Dashboard
                 </a>
                 <button onclick="handleStaffLogout()" 
                         class="w-full h-[46px] bg-transparent border border-[#594238] text-[#E0C0B2]/60 hover:text-[#FFB595] hover:border-[#FFB595]/50 font-montserrat font-bold text-xs uppercase tracking-widest rounded-sm flex items-center justify-center transition duration-200 active:scale-[0.98]">
@@ -256,8 +256,8 @@
                 // Fire state sync events
                 window.dispatchEvent(new Event('relatif_staff_login_state'));
                 
-                // Redirect back to menu dashboard
-                window.location.href = "{{ route('relatif.menu') }}";
+                // Redirect to cashier dashboard
+                window.location.href = "{{ route('relatif.cashier') }}";
             }, 2400);
         }
 
