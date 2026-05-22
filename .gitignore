@@ -3,6 +3,14 @@
 .env
 .env.backup
 .env.production
+
+# FastAPI Backend
+fastapi_backend/venv/
+fastapi_backend/.env
+fastapi_backend/__pycache__/
+fastapi_backend/**/__pycache__/
+*.pyc
+*.pyo
 .phpactor.json
 .phpunit.result.cache
 /.codex
