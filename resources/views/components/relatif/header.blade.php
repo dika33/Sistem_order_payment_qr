@@ -11,7 +11,7 @@
         <!-- Table Number -->
         <div class="flex items-center gap-1">
             <span class="font-montserrat text-sm text-[#E0C0B2] leading-tight text-right">
-                Table<br><strong class="font-semibold text-[#FFB595]">04</strong>
+                Table<br><strong class="font-semibold text-[#FFB595]">{{ str_pad(session('table_number', '?'), 2, '0', STR_PAD_LEFT) }}</strong>
             </span>
             <!-- Small Indicator Icon -->
             <svg class="w-2.5 h-3 text-[#EE671C] animate-pulse" fill="currentColor" viewBox="0 0 24 24">

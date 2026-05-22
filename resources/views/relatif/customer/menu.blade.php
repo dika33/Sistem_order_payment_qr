@@ -60,25 +60,26 @@
             });
         </script>
 
-        <!-- Menu Section: Signatures -->
+        <!-- Menu Sections by Category -->
+        @foreach($menusByCategory as $category => $items)
         <section class="flex flex-col gap-4">
-            <h2 class="font-playfair text-[28px] font-semibold text-[#FFB595] tracking-wide select-none">
-                Signatures
+            <h2 class="font-playfair text-[28px] font-semibold text-[#FFB595] tracking-wide select-none capitalize">
+                {{ str_replace('_', ' ', $category) }}
             </h2>
-            
-            <!-- Items Responsive Grid -->
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                @foreach($signatures as $item)
-                    <x-relatif.menu-item 
+                @foreach($items as $item)
+                    <x-relatif.menu-item
                         :id="$item['id']"
-                        :title="$item['title']"
+                        :title="$item['name']"
                         :price="$item['price']"
-                        :description="$item['description']"
-                        :image="$item['image']"
+                        :description="$item['description'] ?? ''"
+                        :image="$item['image_url'] ?? 'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&q=80&w=600'"
                     />
                 @endforeach
             </div>
         </section>
+        @endforeach
     </div>
 
     <!-- Floating Cart Footer (Overlaid) -->

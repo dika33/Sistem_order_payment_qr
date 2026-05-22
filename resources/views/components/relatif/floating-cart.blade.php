@@ -17,51 +17,58 @@
     </div>
 </div>
 
+<!-- In-memory simple cart state -->    
 <script>
-    // In-memory simple cart state
-    const cart = {
-        items: {},
-        totalItems: 0,
-        totalPrice: 0
-    };
+const cart = {
+    items: {},
+    totalItems: 0,
+    totalPrice: 0
+};
 
-    function formatRupiah(num) {
-        return num.toLocaleString('id-ID');
+function formatRupiah(num) {
+    return num.toLocaleString('id-ID');
+}
+
+function addToCart(id, title, price) {
+    if (!cart.items[id]) {
+        cart.items[id] = { id, title, price, qty: 0 };
     }
+    cart.items[id].qty += 1;
+    cart.totalItems += 1;
+    cart.totalPrice += price;
+    saveCartToStorage();
+    updateCartUI();
+}
 
-    function addToCart(id, title, price) {
-        if (!cart.items[id]) {
-            cart.items[id] = { title, price, qty: 0 };
-        }
-        cart.items[id].qty += 1;
-        
-        cart.totalItems += 1;
-        cart.totalPrice += price;
+function saveCartToStorage() {
+    const items = Object.values(cart.items).map(item => ({
+        id: item.id,
+        title: item.title,
+        price: item.price,
+        qty: item.qty,
+        options: '',
+        image: 'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&q=80&w=600'
+    }));
+    localStorage.setItem('relatif_cart', JSON.stringify(items));
+}
 
-        updateCartUI();
+function updateCartUI() {
+    const cartEl = document.getElementById('floating-cart');
+    const countEl = document.getElementById('cart-items-count');
+    const priceEl = document.getElementById('cart-total-price');
+    if (cart.totalItems > 0) {
+        countEl.textContent = `${cart.totalItems} ${cart.totalItems === 1 ? 'Item' : 'Items'}`;
+        priceEl.textContent = `Rp ${formatRupiah(cart.totalPrice)}`;
+        cartEl.classList.remove('hidden');
+        setTimeout(() => {
+            cartEl.classList.remove('translate-y-4', 'opacity-0');
+        }, 10);
+    } else {
+        cartEl.classList.add('translate-y-4', 'opacity-0');
+        setTimeout(() => {
+            cartEl.classList.add('hidden');
+        }, 300);
     }
-
-    function updateCartUI() {
-        const cartEl = document.getElementById('floating-cart');
-        const countEl = document.getElementById('cart-items-count');
-        const priceEl = document.getElementById('cart-total-price');
-
-        if (cart.totalItems > 0) {
-            countEl.textContent = `${cart.totalItems} ${cart.totalItems === 1 ? 'Item' : 'Items'}`;
-            priceEl.textContent = `Rp ${formatRupiah(cart.totalPrice)}`;
-
-            // Show animation
-            cartEl.classList.remove('hidden');
-            // Allow layout render before animating
-            setTimeout(() => {
-                cartEl.classList.remove('translate-y-4', 'opacity-0');
-            }, 10);
-        } else {
-            cartEl.classList.add('translate-y-4', 'opacity-0');
-            setTimeout(() => {
-                cartEl.classList.add('hidden');
-            }, 300);
-        }
-    }
+}
 </script>
 

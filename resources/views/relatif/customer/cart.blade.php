@@ -157,7 +157,7 @@
     <!-- Interactive JS to manage cart state in real-time -->
     <script>
         // Set dynamic state passed from controller
-        let cartItems = @json($cartItems);
+        let cartItems = JSON.parse(localStorage.getItem('relatif_cart') || '[]');
         let selectedPaymentMethod = 'qris';
 
         function renderCartItems() {
@@ -302,34 +302,61 @@
             document.getElementById('summary-total').textContent = `Rp ${Math.round(total).toLocaleString('id-ID')}`;
         }
 
-        function triggerCheckout() {
+        async function triggerCheckout() {
             if (cartItems.length === 0) {
-                alert('Your cart is empty!');
-                return;
-            }
-            
-            // Build custom order details and save to localStorage
-            const grandTotal = document.getElementById('summary-total').textContent;
-            const purchaseInfo = {
-                order_number: '#ORD-' + Math.floor(Math.random() * 9000 + 1000),
-                amount_paid: grandTotal,
-                payment_method: selectedPaymentMethod.toUpperCase(),
-                items: cartItems.map(item => ({
-                    qty: item.qty,
-                    title: item.title,
-                    options: item.options
-                })),
-                status: 'Being Prepared by Barista',
-                est_time: '5 Min'
-            };
-            
-            localStorage.setItem('relatif_latest_order', JSON.stringify(purchaseInfo));
-            
-            // Redirect to the Payment Gateway page!
-            window.location.href = "{{ route('relatif.payment') }}";
+            alert('Your cart is empty!');
+            return;
         }
 
-        // Initialize view on load
-        renderCartItems();
+        const tableNumber = {{ session('table_number', 1) }};
+    
+        const items = cartItems.map(item => ({
+            menu_id: item.id,
+            quantity: item.qty
+        }));
+
+        try {
+            const btn = document.querySelector('button[onclick="triggerCheckout()"]');
+                if (btn) btn.innerHTML = 'Processing...';
+
+            const orderRes = await fetch('http://127.0.0.1:8001/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    table_id: tableNumber,
+                    customer_name: localStorage.getItem('relatif_member_name') || 'Guest',
+                    is_member: localStorage.getItem('relatif_member_name') ? true : false,
+                    items: items
+                })
+        });
+
+            const orderData = await orderRes.json();
+                if (orderData.status !== 'success') {
+                alert('Gagal membuat order!');
+                return;
+                }
+
+            const payRes = await fetch(`http://127.0.0.1:8001/orders/${orderData.order_id}/pay`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const payData = await payRes.json();
+                if (payData.status !== 'success') {
+                alert('Gagal membuat payment!');
+                return;
+            }
+
+            localStorage.removeItem('relatif_cart');
+            window.location.href = payData.redirect_url;
+
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderCartItems();
+        });
     </script>
 @endsection

@@ -221,9 +221,9 @@
             }
         }
 
-        function handleStaffLogin(event) {
+        async function handleStaffLogin(event) {
             event.preventDefault();
-            
+
             const employeeId = document.getElementById('employee-id').value.trim();
             const pin = document.getElementById('access-pin').value.trim();
 
@@ -235,32 +235,46 @@
             const overlay = document.getElementById('auth-loader-overlay');
             const subtitle = document.getElementById('auth-loader-subtitle');
 
-            // Open overlay
             overlay.classList.remove('hidden');
+            subtitle.textContent = "Checking POS terminal credentials...";
 
-            setTimeout(() => {
-                subtitle.textContent = "Authorizing cash drawer balance...";
-            }, 800);
+            try {
+                const res = await fetch('http://127.0.0.1:8001/staff/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        employee_id: employeeId,
+                        pin: pin
+                    })
+                });
 
-            setTimeout(() => {
-                subtitle.textContent = "Access Granted! Initializing shift data...";
-            }, 1600);
+                const data = await res.json();
 
-            setTimeout(() => {
-                // Save staff state in local storage
-                localStorage.setItem('relatif_staff_name', employeeId.toUpperCase());
-                
-                // Clear customer member name so they don't override each other!
-                localStorage.removeItem('relatif_member_name');
+                if (data.status !== 'success') {
+                    overlay.classList.add('hidden');
+                    alert('Employee ID atau PIN salah!');
+                    return;
+                }
 
-                // Fire state sync events
-                window.dispatchEvent(new Event('relatif_staff_login_state'));
-                
-                // Redirect back to menu dashboard
-                window.location.href = "{{ route('relatif.menu') }}";
-            }, 2400);
+                setTimeout(() => {
+                    subtitle.textContent = "Access Granted! Initializing shift data...";
+                }, 800);
+
+                setTimeout(() => {
+                    localStorage.setItem('relatif_staff_name', data.staff.name);
+                    localStorage.setItem('relatif_staff_id', data.staff.id);
+                    localStorage.setItem('relatif_staff_role', data.staff.role);
+                    localStorage.removeItem('relatif_member_name');
+
+                    window.dispatchEvent(new Event('relatif_staff_login_state'));
+                    window.location.href = "{{ route('relatif.menu') }}";
+                }, 1600);
+
+            } catch (error) {
+                overlay.classList.add('hidden');
+                alert('Error: ' + error.message);
+            }
         }
-
         function handleStaffLogout() {
             if (confirm('Are you sure you want to end your POS shift and logout?')) {
                 localStorage.removeItem('relatif_staff_name');
